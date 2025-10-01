@@ -1,0 +1,659 @@
+openapi: 3.0.3
+info:
+  title: Microblog API
+  description: Twitter-inspired microblog application API (cookie-based authentication)
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080/api
+    description: Local server
+
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: jwt
+
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "u123"
+        username:
+          type: string
+          example: "bharath"
+        email:
+          type: string
+          example: "bharath@example.com"
+        isPrivate:
+          type: boolean
+          example: false
+        followersCount:
+          type: integer
+          example: 120
+        followingCount:
+          type: integer
+          example: 80
+        createdAt:
+          type: string
+          format: date-time
+          example: "2025-09-01T10:00:00Z"
+
+    Post:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "p987"
+        authorId:
+          type: string
+          example: "u123"
+        content:
+          type: string
+          example: "Just launched my new project 🚀"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2025-09-25T12:30:00Z"
+        likesCount:
+          type: integer
+          example: 42
+        commentsCount:
+          type: integer
+          example: 7
+
+    Comment:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "c456"
+        postId:
+          type: string
+          example: "p987"
+        authorId:
+          type: string
+          example: "u123"
+        content:
+          type: string
+          example: "Great work! 👏"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2025-09-25T13:00:00Z"
+
+    FollowRequest:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "fr789"
+        fromUserId:
+          type: string
+          example: "u456"
+        toUserId:
+          type: string
+          example: "u123"
+        status:
+          type: string
+          enum: [pending, accepted, rejected]
+          example: "pending"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2025-09-25T14:00:00Z"
+
+    Message:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Action successful"
+
+security:
+  - cookieAuth: []
+
+tags:
+  - name: Auth
+  - name: Users
+  - name: Follow
+  - name: Follow Requests
+  - name: Posts
+  - name: Likes
+  - name: Comments
+
+paths:
+  # --- Auth ---
+  /auth/login:
+    post:
+      tags: [Auth]
+      security: []
+      summary: Login user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Successful login (JWT cookie set)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+
+  /auth/logout:
+    post:
+      tags: [Auth]
+      security:
+        - cookieAuth: []
+      summary: Logout user
+      responses:
+        '200':
+          description: Successful logout
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+
+  /auth/forgot-password:
+    post:
+      tags: [Auth]
+      security: []
+      summary: Start forgot password flow
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email:
+                  type: string
+      responses:
+        '200':
+          description: Email sent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+
+  /auth/reset-password:
+    post:
+      tags: [Auth]
+      security: []
+      summary: Reset password with token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token, newPassword]
+              properties:
+                token:
+                  type: string
+                newPassword:
+                  type: string
+      responses:
+        '200':
+          description: Password reset successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+
+  # --- Users ---
+  /users:
+    post:
+      tags: [Users]
+      security: []
+      summary: Create new user (register)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, email, password]
+              properties:
+                username:
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
+                isPrivate:
+                  type: boolean
+                  default: false
+      responses:
+        '201':
+          description: User created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+  /users/me:
+    get:
+      tags: [Users]
+      security:
+        - cookieAuth: []
+      summary: Get current logged-in user profile
+      responses:
+        '200':
+          description: Current user profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+  /users/{id}:
+    get:
+      tags: [Users]
+      security:
+        - cookieAuth: []
+      summary: Get user profile by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: User profile with follower/following counts
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+  /users/search:
+    get:
+      tags: [Users]
+      security:
+        - cookieAuth: []
+      summary: Search users
+      parameters:
+        - in: query
+          name: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of matching users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+
+  # --- Follow Requests ---
+  /follow-requests:
+    get:
+      tags: [Follow Requests]
+      security:
+        - cookieAuth: []
+      summary: Get pending follow requests for current user
+      responses:
+        '200':
+          description: List of follow requests
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FollowRequest'
+
+  /follow-requests/{id}/accept:
+    post:
+      tags: [Follow Requests]
+      security:
+        - cookieAuth: []
+      summary: Accept a follow request
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Request accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+
+  /follow-requests/{id}/reject:
+    post:
+      tags: [Follow Requests]
+      security:
+        - cookieAuth: []
+      summary: Reject a follow request
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Request rejected
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+
+  /users/{id}/follow:
+    post:
+      tags: [Follow]
+      security:
+        - cookieAuth: []
+      summary: follow a user / send follow request
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Follow request sent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+    delete:
+      tags: [Follow]
+      security:
+        - cookieAuth: []
+      summary: unfollow a user / delete unfollow request
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Unfollow successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+
+  /users/{id}/followers:
+    get:
+      tags: [Follow]
+      security:
+        - cookieAuth: []
+      summary: Get list of followers for a user
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of followers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+
+  /users/{id}/following:
+    get:
+      tags: [Follow]
+      security:
+        - cookieAuth: []
+      summary: Get list of users this user follows
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of following users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+
+  # --- Posts ---
+  /posts:
+    get:
+      tags: [Posts]
+      security:
+        - cookieAuth: []
+      summary: Get feed of posts
+      parameters:
+        - name: type
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [public, following]
+      responses:
+        '200':
+          description: List of posts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Post'
+    post:
+      tags: [Posts]
+      security:
+        - cookieAuth: []
+      summary: Create a new post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [content]
+              properties:
+                content:
+                  type: string
+      responses:
+        '201':
+          description: Post created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+
+  /posts/{id}:
+    get:
+      tags: [Posts]
+      security:
+        - cookieAuth: []
+      summary: Get single post by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Post object
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+    delete:
+      tags: [Posts]
+      security:
+        - cookieAuth: []
+      summary: Delete post
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Post deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+
+  # --- Likes ---
+  /posts/{id}/likes:
+    get:
+      tags: [Likes]
+      security:
+        - cookieAuth: []
+      summary: Get list of users who liked a post
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+    post:
+      tags: [Likes]
+      security:
+        - cookieAuth: []
+      summary: Like a post
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Post liked
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+    delete:
+      tags: [Likes]
+      security:
+        - cookieAuth: []
+      summary: Unlike a post
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Post unliked
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+
+  # --- Comments ---
+  /posts/{id}/comments:
+    get:
+      tags: [Comments]
+      security:
+        - cookieAuth: []
+      summary: Get comments for a post
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of comments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Comment'
+    post:
+      tags: [Comments]
+      security:
+        - cookieAuth: []
+      summary: Add comment to post
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [content]
+              properties:
+                content:
+                  type: string
+      responses:
+        '201':
+          description: Comment created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+
+  /posts/{id}/comments/{commentId}:
+    delete:
+      tags: [Comments]
+      security:
+        - cookieAuth: []
+      summary: Delete comment
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: commentId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Comment deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
