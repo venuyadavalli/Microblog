@@ -1,0 +1,9 @@
+{
+  "properties": [
+    {
+      "name": "frontend.urls",
+      "type": "java.lang.String",
+      "description": "list of urls to allow, for cors resolving"
+    }
+  ]
+}
