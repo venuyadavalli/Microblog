@@ -5,7 +5,14 @@
   "projects": {
     "microblog": {
       "projectType": "application",
-      "schematics": {},
+      "schematics": {
+        "@schematics/angular:component": {
+          "type": "Component"
+        },
+        "@schematics/angular:service": {
+          "type": "Service"
+        }
+      },
       "root": "",
       "sourceRoot": "src",
       "prefix": "app",
