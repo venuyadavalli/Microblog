@@ -10,6 +10,7 @@ import { AuthService } from '../auth.service';
   template: `
     <h2>Register</h2>
     <form (ngSubmit)="register()">
+      <input type="text" placeholder="Username" [(ngModel)]="username" name="username" required />
       <input type="email" placeholder="Email" [(ngModel)]="email" name="email" required />
       <input type="password" placeholder="Password" [(ngModel)]="password" name="password" required />
       <button type="submit">Register</button>
@@ -18,14 +19,15 @@ import { AuthService } from '../auth.service';
   `,
 })
 export class RegisterPage {
+  username = '';
   email = '';
   password = '';
 
-  constructor(private authService: AuthService, private router: Router) {}
+  constructor(private authService: AuthService, private router: Router) { }
 
   async register() {
     try {
-      await this.authService.register(this.email, this.password);
+      await this.authService.register(this.username, this.email, this.password);
       this.router.navigate(['/login']);
     } catch (error) {
       console.error(error);
