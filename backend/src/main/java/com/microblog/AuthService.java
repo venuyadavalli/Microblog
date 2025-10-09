@@ -4,6 +4,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.SessionCookieOptions;
 import com.google.firebase.auth.UserRecord;
+import com.microblog.models.User;
+import com.microblog.repositories.UserRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,17 +17,31 @@ import java.util.Map;
 public class AuthService {
 
   @Autowired
+  private UserRepository userRepository;
+
+  @Autowired
   private FirebaseAuth firebaseAuth;
 
-  public Map<String, Object> register(String email, String password) throws FirebaseAuthException {
+  public Map<String, Object> register(String username, String email, String password)
+      throws IllegalArgumentException, FirebaseAuthException {
+
+    if (userRepository.findByUsername(username).isPresent()) {
+      throw new IllegalArgumentException("Username is already taken");
+    }
+
     UserRecord.CreateRequest request = new UserRecord.CreateRequest()
         .setEmail(email)
         .setPassword(password);
 
     UserRecord userRecord = firebaseAuth.createUser(request);
+
+    User userEntity = new User(userRecord.getUid(), username);
+    userRepository.save(userEntity);
+
     return Map.of(
         "uid", userRecord.getUid(),
-        "email", userRecord.getEmail());
+        "email", userRecord.getEmail(),
+        "username", username);
   }
 
   public String createSessionCookie(String idToken) throws FirebaseAuthException {
