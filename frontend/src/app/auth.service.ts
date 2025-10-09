@@ -11,12 +11,20 @@ export class AuthService {
   private auth = inject(Auth);
   private http = inject(HttpClient)
 
-  async register(email: string, password: string) {
+  async register(username: string, email: string, password: string) {
     try {
-      const userCredential = await createUserWithEmailAndPassword(this.auth, email, password);
-      return userCredential.user;
+      const response = await firstValueFrom(
+        this.http.post(
+          '/auth/register',
+          { username, email, password },
+          { withCredentials: true }
+        )
+      );
+      console.log('[AuthService] register response:', response);
+
+      return { response };
     } catch (error) {
-      console.error('Registration Error:', error);
+      console.error('[AuthService] register error:', error);
       throw error;
     }
   }
