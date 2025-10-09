@@ -1,4 +1,3 @@
-// auth/login.page.ts
 import { Component } from '@angular/core';
 import { RouterModule, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -28,8 +27,8 @@ export class LoginPage {
   async login() {
     try {
       const response = await this.authService.login(this.email, this.password);
-      console.log('Login successful:', response); // prints UserCredential
-      this.router.navigate(['/welcome']); // redirect after login
+      console.log('Login successful:', response);
+      this.router.navigate(['/welcome']);
     } catch (error) {
       console.error(error);
     }

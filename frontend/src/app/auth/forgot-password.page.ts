@@ -1,9 +1,7 @@
-// auth/forgot-password.page.ts
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../auth.service';
-import { sendPasswordResetEmail } from '@angular/fire/auth';
 
 @Component({
   standalone: true,
