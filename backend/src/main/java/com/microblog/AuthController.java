@@ -29,7 +29,7 @@ public class AuthController {
   @Autowired
   private AuthService authService;
 
-  public record RegisterRequest(String email, String password) {
+  public record RegisterRequest(String username, String email, String password) {
   }
 
   public record LoginRequest(String idToken) {
@@ -42,7 +42,7 @@ public class AuthController {
 
   @PostMapping("/register")
   public Map<String, Object> register(@RequestBody RegisterRequest request) throws FirebaseAuthException {
-    return authService.register(request.email(), request.password());
+    return authService.register(request.username(), request.email(), request.password());
   }
 
   @PostMapping("/login")
