@@ -4,6 +4,7 @@ import { Auth } from '@angular/fire/auth';
 import { onAuthStateChanged, signOut, User } from 'firebase/auth';
 import { AuthService } from './auth.service';
 import { JsonPipe } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   standalone: true,
@@ -22,9 +23,17 @@ export class WelcomePage implements OnInit {
   private auth = inject(Auth);
   private router = inject(Router);
   private authService = inject(AuthService);
+  private http = inject(HttpClient);
 
   userinfo: User | null = null;
   joinedAt: string | null = null;
+
+  ping(): void {
+    this.http.get('/ping', { responseType: 'text' }).subscribe({
+      next: res => console.log('Ping response:', res),
+      error: err => console.error('Ping failed:', err)
+    });
+  }
 
   formatTimestamp(ts: string | number | undefined | null): string {
     if (!ts) return '';
@@ -43,6 +52,7 @@ export class WelcomePage implements OnInit {
 
   ngOnInit(): void {
     onAuthStateChanged(this.auth, this.handleAuthChange);
+    this.ping();
   }
 
   async logout(): Promise<void> {
