@@ -26,10 +26,9 @@ export class AuthService {
       const userCredential = await signInWithEmailAndPassword(this.auth, email, password);
       const idToken = await userCredential.user.getIdToken();
 
-      // Post to backend to set session cookie
       const backendResponse = await firstValueFrom(
         this.http.post(
-          'http://localhost:8080/auth/login',
+          '/auth/login',
           { idToken },
           { withCredentials: true }
         )
@@ -47,7 +46,7 @@ export class AuthService {
     try {
       const backendResponse = await firstValueFrom(
         this.http.post(
-          'http://localhost:8080/auth/logout',
+          '/auth/logout',
           {},
           { withCredentials: true }
         )
