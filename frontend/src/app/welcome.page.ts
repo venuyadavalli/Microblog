@@ -15,6 +15,8 @@ import { HttpClient } from '@angular/common/http';
     <p>You are logged in.</p>
     <p>Email: {{ userinfo?.email }}</p>
     <p>Joined: {{ joinedAt }}</p>
+    <p><strong>Backend User:</strong> {{ backendUser?.email }}</p>
+    <pre>{{ backendUser | json }}</pre>
     <button (click)="logout()">Logout</button>
     <pre>{{ userinfo | json }}</pre>
   `,
@@ -27,12 +29,33 @@ export class WelcomePage implements OnInit {
 
   userinfo: User | null = null;
   joinedAt: string | null = null;
+  backendUser: any = null;
 
   ping(): void {
     this.http.get('/ping', { responseType: 'text' }).subscribe({
       next: res => console.log('Ping response:', res),
       error: err => console.error('Ping failed:', err)
     });
+  }
+
+  async getBackendUser(): Promise<void> {
+    const user = this.auth.currentUser;
+    const token = user ? await user.getIdToken() : null;
+    if (token) {
+      this.http.get('/auth/me', { headers: { Authorization: `Bearer ${token}` } }).subscribe({
+        next: userData => {
+          this.backendUser = userData;
+          console.log(userData);
+
+        },
+        error: err => {
+          console.error('Backend user fetch failed:', err);
+          this.backendUser = null;
+        }
+      });
+    } else {
+      this.backendUser = null;
+    }
   }
 
   formatTimestamp(ts: string | number | undefined | null): string {
@@ -48,11 +71,17 @@ export class WelcomePage implements OnInit {
   handleAuthChange = (user: User | null) => {
     this.userinfo = user;
     this.joinedAt = this.formatTimestamp(user?.metadata?.creationTime ?? null);
-  }
+    if (user) {
+      this.getBackendUser();
+    } else {
+      this.backendUser = null;
+    }
+  };
 
   ngOnInit(): void {
     onAuthStateChanged(this.auth, this.handleAuthChange);
     this.ping();
+    this.getBackendUser();
   }
 
   async logout(): Promise<void> {
