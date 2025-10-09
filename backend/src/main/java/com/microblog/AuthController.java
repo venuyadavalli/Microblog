@@ -26,6 +26,11 @@ public class AuthController {
   public record LoginRequest(String idToken) {
   }
 
+  @GetMapping("/me")
+  public Map<String, Object> me(@AuthenticationPrincipal FirebaseToken principal) {
+    return Map.of("uid", principal.getUid(), "email", principal.getEmail());
+  }
+
   @PostMapping("/register")
   public Map<String, Object> register(@RequestBody RegisterRequest request) throws FirebaseAuthException {
     return authService.register(request.email(), request.password());
@@ -57,16 +62,6 @@ public class AuthController {
         .build();
     response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     return Map.of("status", "logged_out");
-  }
-
-  @GetMapping("/me")
-  public Map<String, Object> me(@CookieValue(name = "session", required = false) String sessionCookie)
-      throws FirebaseAuthException {
-    if (sessionCookie == null) {
-      return Map.of("error", "Not authenticated");
-    }
-    FirebaseToken decoded = FirebaseAuth.getInstance().verifySessionCookie(sessionCookie);
-    return Map.of("uid", decoded.getUid(), "email", decoded.getEmail());
   }
 
   @DeleteMapping("/delete")
