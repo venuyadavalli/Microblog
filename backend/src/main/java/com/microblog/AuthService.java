@@ -35,7 +35,9 @@ public class AuthService {
 
     UserRecord userRecord = firebaseAuth.createUser(request);
 
-    User userEntity = new User(userRecord.getUid(), username);
+    User userEntity = new User();
+    userEntity.setId(userRecord.getUid());
+    userEntity.setUsername(username);
     userRepository.save(userEntity);
 
     return Map.of(
