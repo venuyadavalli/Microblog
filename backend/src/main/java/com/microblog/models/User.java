@@ -1,8 +1,13 @@
 package com.microblog.models;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
@@ -16,13 +21,8 @@ public class User {
   @Column(name = "username", nullable = false, length = 64, unique = true)
   private String username;
 
-  public User() {
-  }
-
-  public User(String id, String username) {
-    this.id = id;
-    this.username = username;
-  }
+  @OneToMany(mappedBy = "author", fetch = FetchType.LAZY)
+  private List<Post> posts = new ArrayList<>();
 
   public String getId() {
     return id;
@@ -39,4 +39,13 @@ public class User {
   public void setUsername(String username) {
     this.username = username;
   }
+
+  public List<Post> getPosts() {
+    return posts;
+  }
+
+  public void setPosts(List<Post> posts) {
+    this.posts = posts;
+  }
+
 }
