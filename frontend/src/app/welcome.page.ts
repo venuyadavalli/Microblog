@@ -38,7 +38,7 @@ export class WelcomePage implements OnInit {
     });
   }
 
-  async getBackendUser(): Promise<void> {
+  async getBackendUserOld(): Promise<void> {
     const user = this.auth.currentUser;
     const token = user ? await user.getIdToken() : null;
     if (token) {
@@ -56,6 +56,23 @@ export class WelcomePage implements OnInit {
     } else {
       this.backendUser = null;
     }
+  }
+
+  async getBackendUser(): Promise<void> {
+    // const user = this.auth.currentUser;
+    // const token = user ? await user.getIdToken() : null;
+    this.http
+      .get('/auth/me')
+      .subscribe({
+        next: userData => {
+          this.backendUser = userData;
+          console.log(userData);
+        },
+        error: err => {
+          console.error('Backend user fetch failed:', err);
+          this.backendUser = null;
+        }
+      });
   }
 
   formatTimestamp(ts: string | number | undefined | null): string {
