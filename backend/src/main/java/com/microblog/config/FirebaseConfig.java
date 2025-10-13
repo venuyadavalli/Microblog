@@ -1,4 +1,4 @@
-package com.microblog;
+package com.microblog.config;
 
 import java.io.IOException;
 import java.io.InputStream;

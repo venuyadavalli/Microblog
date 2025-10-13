@@ -1,4 +1,4 @@
-package com.microblog;
+package com.microblog.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.FirebaseToken;
 import com.microblog.dto.UserInfo;
+import com.microblog.services.AuthService;
 import com.microblog.services.CurrentUserService;
 
 @RestController
