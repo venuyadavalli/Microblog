@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.microblog.dto.UserInfo;
+import com.microblog.dto.UserItem;
 import com.microblog.dto.UserItemView;
 import com.microblog.dto.UserProfileView;
 
@@ -18,7 +19,10 @@ import java.util.stream.Collectors;
 public class UserMapperService {
 
   @Autowired
-  private FollowService followService;
+  private FollowsService followService;
+
+  @Autowired
+  private CurrentUserService currentUser;
 
   public static String formatEpochMilliToDate(String epochMilliStr) {
     long epochMilli = Long.parseLong(epochMilliStr);
@@ -50,6 +54,21 @@ public class UserMapperService {
   public List<UserItemView> toUserItemViewList(List<UserInfo> userInfos, String currentUserId) {
     return userInfos.stream()
         .map(userInfo -> toUserItemView(userInfo, currentUserId))
+        .collect(Collectors.toList());
+  }
+
+  private UserItemView toUserItemView(UserItem userItem, String currentUserId) {
+    UserItemView view = new UserItemView();
+    view.setId(userItem.getId());
+    view.setUsername(userItem.getUsername());
+    Boolean isFollowed = followService.isFollowing(currentUserId, userItem.getId());
+    view.setIsFollowed(isFollowed);
+    return view;
+  }
+
+  public List<UserItemView> toUserItemViewListFromItems(List<UserItem> userItems) {
+    return userItems.stream()
+        .map(userItem -> toUserItemView(userItem, currentUser.getId()))
         .collect(Collectors.toList());
   }
 

@@ -3,6 +3,9 @@ package com.microblog.models;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -23,6 +26,18 @@ public class User {
 
   @OneToMany(mappedBy = "author", fetch = FetchType.LAZY)
   private List<Post> posts = new ArrayList<>();
+
+  @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+  @JsonManagedReference(value = "user-likes")
+  private List<Like> likes = new ArrayList<>();
+
+  public List<Like> getLikes() {
+    return likes;
+  }
+
+  public void setLikes(List<Like> likes) {
+    this.likes = likes;
+  }
 
   public String getId() {
     return id;

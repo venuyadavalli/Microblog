@@ -1,26 +1,17 @@
 package com.microblog;
 
-import java.util.Map;
-
-import org.apache.tomcat.util.http.SameSiteCookies;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.CookieValue;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.FirebaseToken;
-
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletResponse;
+import com.microblog.dto.UserInfo;
+import com.microblog.services.CurrentUserService;
 
 @RestController
 @RequestMapping("/auth")
@@ -29,6 +20,9 @@ public class AuthController {
   @Autowired
   private AuthService authService;
 
+  @Autowired
+  private CurrentUserService currentUser;
+
   public record RegisterRequest(String username, String email, String password) {
   }
 
@@ -36,58 +30,13 @@ public class AuthController {
   }
 
   @GetMapping("/me")
-  public Map<String, Object> me(@AuthenticationPrincipal FirebaseToken principal) {
-    return Map.of("uid", principal.getUid(), "email", principal.getEmail());
+  public UserInfo me(@AuthenticationPrincipal FirebaseToken principal) throws FirebaseAuthException {
+    return currentUser.getInfo();
   }
 
   @PostMapping("/register")
-  public Map<String, Object> register(@RequestBody RegisterRequest request) throws FirebaseAuthException {
+  public UserInfo register(@RequestBody RegisterRequest request) throws FirebaseAuthException {
     return authService.register(request.username(), request.email(), request.password());
   }
 
-  @PostMapping("/login")
-  public Map<String, Object> login(@RequestBody LoginRequest request, HttpServletResponse response)
-      throws FirebaseAuthException {
-    String sessionCookie = authService.createSessionCookie(request.idToken());
-    ResponseCookie cookie = ResponseCookie.from("jwt", sessionCookie)
-        .httpOnly(true)
-        .secure(false)
-        .path("/")
-        .maxAge(60 * 60)
-        .sameSite(SameSiteCookies.LAX.toString())
-        .build();
-    response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
-    FirebaseToken decoded = FirebaseAuth.getInstance().verifySessionCookie(sessionCookie);
-    return Map.of("status", "logged_in", "uid", decoded.getUid(), "email", decoded.getEmail());
-  }
-
-  @PostMapping("/logout")
-  public Map<String, Object> logout(HttpServletResponse response) {
-    ResponseCookie cookie = ResponseCookie.from("jwt", "")
-        .httpOnly(true)
-        .secure(false)
-        .path("/")
-        .sameSite(SameSiteCookies.LAX.toString())
-        .build();
-    response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
-    return Map.of("status", "logged_out");
-  }
-
-  @DeleteMapping("/delete")
-  public Map<String, Object> delete(@CookieValue(name = "session", required = false) String sessionCookie,
-      HttpServletResponse response) throws FirebaseAuthException {
-    if (sessionCookie == null) {
-      return Map.of("error", "Not authenticated");
-    }
-    FirebaseToken decoded = FirebaseAuth.getInstance().verifySessionCookie(sessionCookie);
-    FirebaseAuth.getInstance().revokeRefreshTokens(decoded.getUid());
-    authService.deleteUser(decoded.getUid());
-    Cookie clearCookie = new Cookie("session", "");
-    clearCookie.setHttpOnly(true);
-    clearCookie.setSecure(true);
-    clearCookie.setPath("/");
-    clearCookie.setMaxAge(0);
-    response.addCookie(clearCookie);
-    return Map.of("status", "deleted", "uid", decoded.getUid(), "email", decoded.getEmail());
-  }
 }

@@ -3,6 +3,7 @@ import { Auth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendP
 import { inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
+import { signOut } from 'firebase/auth';
 
 @Injectable({
   providedIn: 'root',
@@ -34,16 +35,16 @@ export class AuthService {
       const userCredential = await signInWithEmailAndPassword(this.auth, email, password);
       const idToken = await userCredential.user.getIdToken();
 
-      const backendResponse = await firstValueFrom(
-        this.http.post(
-          '/auth/login',
-          { idToken },
-          { withCredentials: true }
-        )
-      );
-      console.log('Backend login response:', backendResponse);
+      // const backendResponse = await firstValueFrom(
+      //   this.http.post(
+      //     '/auth/login',
+      //     { idToken },
+      //     { withCredentials: true }
+      //   )
+      // );
+      // console.log('Backend login response:', backendResponse);
 
-      return { firebaseUser: userCredential.user, backendResponse };
+      // return { firebaseUser: userCredential.user, backendResponse };
     } catch (error) {
       console.error('Login Error:', error);
       throw error;
@@ -52,15 +53,17 @@ export class AuthService {
 
   async logout() {
     try {
-      const backendResponse = await firstValueFrom(
-        this.http.post(
-          '/auth/logout',
-          {},
-          { withCredentials: true }
-        )
-      );
-      console.log('Backend logout response:', backendResponse);
-      return backendResponse;
+      signOut(this.auth);
+      // implement logout associated signup code, firebase, client side, angular v20
+      // const backendResponse = await firstValueFrom(
+      //   this.http.post(
+      //     '/auth/logout',
+      //     {},
+      //     { withCredentials: true }
+      //   )
+      // );
+      // console.log('Backend logout response:', backendResponse);
+      // return backendResponse;
     } catch (error) {
       console.error('Logout Error:', error);
       throw error;

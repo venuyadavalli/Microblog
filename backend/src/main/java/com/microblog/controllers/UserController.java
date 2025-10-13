@@ -1,17 +1,19 @@
 package com.microblog.controllers;
 
-import com.google.firebase.auth.FirebaseAuthException;
-import com.google.firebase.auth.FirebaseToken;
-import com.microblog.dto.UserItemView;
-import com.microblog.dto.UserProfileView;
-import com.microblog.services.UserMapperService;
-import com.microblog.services.UserService;
-
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.google.firebase.auth.FirebaseAuthException;
+import com.microblog.dto.UserItemView;
+import com.microblog.dto.UserProfileView;
+import com.microblog.services.CurrentUserService;
+import com.microblog.services.UserMapperService;
+import com.microblog.services.UserService;
 
 @RestController
 @RequestMapping("/users")
@@ -23,20 +25,19 @@ public class UserController {
   @Autowired
   private UserMapperService userMapperService;
 
+  @Autowired
+  private CurrentUserService currentUser;
+
   @GetMapping("/info/{username}")
   public UserProfileView getUserProfileViewByUsername(@PathVariable String username) throws FirebaseAuthException {
-    var auth = (FirebaseToken) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    var currentUserId = auth.getUid();
     var targetUser = userService.getUserInfoByUsername(username);
-    return userMapperService.toUserProfileView(targetUser, currentUserId);
+    return userMapperService.toUserProfileView(targetUser, currentUser.getId());
   }
 
   @GetMapping("/search/{usernamePart}")
   public List<UserItemView> searchUsers(@PathVariable String usernamePart) throws FirebaseAuthException {
-    var auth = (FirebaseToken) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    var currentUserId = auth.getUid();
     var matchingUsers = userService.searchUsersByUsername(usernamePart);
-    return userMapperService.toUserItemViewList(matchingUsers, currentUserId);
+    return userMapperService.toUserItemViewList(matchingUsers, currentUser.getId());
   }
 
 }

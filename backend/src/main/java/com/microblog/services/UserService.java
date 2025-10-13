@@ -30,8 +30,8 @@ public class UserService {
       userInfo.setId(user.getId());
       userInfo.setEmail(userRecord.getEmail());
       userInfo.setUsername(user.getUsername());
-      userInfo.setDisplayName(userRecord.getDisplayName());
       userInfo.setCreationTime(createdAt);
+
       return userInfo;
     } catch (FirebaseAuthException e) {
       throw new RuntimeException("Failed to fetch Firebase info for user " + user.getId(), e);

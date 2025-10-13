@@ -1,6 +1,9 @@
 package com.microblog.controllers;
 
+import com.microblog.dto.UserItemView;
 import com.microblog.services.FollowsService;
+import com.microblog.services.UserMapperService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,6 +16,9 @@ public class FollowsController {
 
   @Autowired
   private FollowsService followsService;
+
+  @Autowired
+  private UserMapperService userMapperService;
 
   @PostMapping("/{uid}")
   public ResponseEntity<Void> follow(@PathVariable String uid) {
@@ -27,12 +33,12 @@ public class FollowsController {
   }
 
   @GetMapping("/followers/{id}")
-  public List<FollowsService.UserDTO> getFollowers(@PathVariable String id) {
-    return followsService.getFollowers(id);
+  public List<UserItemView> getFollowers(@PathVariable String id) {
+    return userMapperService.toUserItemViewListFromItems(followsService.getFollowers(id));
   }
 
   @GetMapping("/followees/{id}")
-  public List<FollowsService.UserDTO> getFollowees(@PathVariable String id) {
-    return followsService.getFollowees(id);
+  public List<UserItemView> getFollowees(@PathVariable String id) {
+    return userMapperService.toUserItemViewListFromItems(followsService.getFollowees(id));
   }
 }

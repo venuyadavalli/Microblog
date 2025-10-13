@@ -13,6 +13,7 @@ import { HttpClient } from '@angular/common/http';
   template: `
     <h1>Welcome!</h1>
     <p>You are logged in.</p>
+    <pre>{{ accessToken | json }}</pre>
     <p>Email: {{ userinfo?.email }}</p>
     <p>Joined: {{ joinedAt }}</p>
     <p><strong>Backend User:</strong> {{ backendUser?.email }}</p>
@@ -30,6 +31,11 @@ export class WelcomePage implements OnInit {
   userinfo: User | null = null;
   joinedAt: string | null = null;
   backendUser: any = null;
+
+  get accessToken(): string | undefined {
+    return (this.userinfo as any)?.stsTokenManager?.accessToken;
+  }
+
 
   ping(): void {
     this.http.get('/ping', { responseType: 'text' }).subscribe({
