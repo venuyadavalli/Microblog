@@ -15,6 +15,9 @@ public class SseController {
 	@GetMapping("/sse/stream")
 	public SseEmitter stream() {
 		SseEmitter emitter = new SseEmitter();
+		// want to implement a controller / adapter / service
+		// that handles what kinds of events to send 
+		// will publish at the service
 		Executors.newSingleThreadExecutor().execute(() -> {
 			try {
 				emitter.send(SseEmitter.event().data("hello from backend"));
