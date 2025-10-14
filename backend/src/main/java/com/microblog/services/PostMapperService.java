@@ -19,6 +19,7 @@ public class PostMapperService {
         dto.setContent(post.getContent());
         dto.setCreatedAt(post.getCreatedAt());
         dto.setLiked(likeService.isLiked(post.getId(), id));
+        dto.setLikedCount(likeService.getLikeCount(post.getId()));
         return dto;
     }
 }

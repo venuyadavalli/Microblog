@@ -9,6 +9,7 @@ public class PostView {
     private String content;
     private LocalDateTime createdAt;
     private boolean liked;
+    private Long likedCount;
 
     public UUID getId() {
         return id;
@@ -48,6 +49,14 @@ public class PostView {
 
     public void setLiked(boolean liked) {
         this.liked = liked;
+    }
+
+    public Long getLikedCount() {
+        return likedCount;
+    }
+
+    public void setLikedCount(Long likedCount) {
+        this.likedCount = likedCount;
     }
 
 }

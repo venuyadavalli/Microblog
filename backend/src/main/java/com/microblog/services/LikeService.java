@@ -63,6 +63,11 @@ public class LikeService {
         .collect(Collectors.toList());
   }
 
+  public long getLikeCount(UUID postId) {
+    Post post = postRepository.findById(postId).orElseThrow();
+    return likeRepository.countByPost(post);
+  }
+
   private UserItem toUserItem(User user) {
     UserItem u = new UserItem();
     u.setId(user.getId());
@@ -79,4 +84,8 @@ public class LikeService {
         .map(this::toUserItem)
         .toList();
   }
+
+  // implement here to get the like count for a post
+  // else implement it in repo implicitly if repo
+  // can do it
 }
