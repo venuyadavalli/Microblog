@@ -1,5 +1,6 @@
 package com.microblog.services;
 
+import com.microblog.demo.PingEventPublisher;
 import com.microblog.models.Post;
 import com.microblog.repositories.PostRepository;
 
@@ -11,14 +12,21 @@ import java.util.UUID;
 
 @Service
 public class PostService {
+
+    private final PingEventPublisher pingEventPublisher;
     @Autowired
     private PostRepository postRepository;
+
+    PostService(PingEventPublisher pingEventPublisher) {
+        this.pingEventPublisher = pingEventPublisher;
+    }
 
     public List<Post> getPostsByUsername(String username) {
         return postRepository.findAllByAuthorUsername(username);
     }
 
     public Post addPost(Post post) {
+        pingEventPublisher.publishPing("a new post is created by: " + post.getAuthor().getUsername());
         return postRepository.save(post);
     }
 

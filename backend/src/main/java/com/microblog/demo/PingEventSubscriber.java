@@ -11,7 +11,9 @@ public class PingEventSubscriber {
   private SseService sseService;
 
   @EventListener
+  // can this be async ?
   public void onPingEvent(PingEvent event) {
+    System.out.println("onPingEvent: invoked");
     sseService.sendPing(event.getMessage());
   }
 }

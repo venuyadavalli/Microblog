@@ -43,9 +43,9 @@ export class SseService {
     const log = (msg: string, err?: any) =>
       console.log(`[SseService] ${msg}`, err ?? '');
 
-    const handleMessage = (event: { data: string }) => {
+    const handleMessage = (event: { data: { name: string, data: string } }) => {
       retryCount = 0;
-      subscriber.next(event.data);
+      subscriber.next(event.data.data);
     };
 
     const handleError = (error: unknown) => {

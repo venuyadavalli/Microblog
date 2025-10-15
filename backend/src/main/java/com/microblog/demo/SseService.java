@@ -22,12 +22,15 @@ public class SseService {
   }
 
   public void sendPing(String message) {
+    System.out.println("SSE SERVICE: sendPing: invoked");
     for (SseEmitter emitter : emitters) {
       try {
+        // can this be async ?
         emitter.send(SseEmitter.event()
             .name("ping")
             .data(message));
       } catch (IOException e) {
+        System.out.println(e);
         emitters.remove(emitter);
       }
     }

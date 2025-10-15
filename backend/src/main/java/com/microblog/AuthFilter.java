@@ -44,9 +44,10 @@ public class AuthFilter extends OncePerRequestFilter {
       List<SimpleGrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
       AbstractAuthenticationToken authenticationToken = new FirebaseAuthenticationToken(decodedToken, authorities);
       authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-      
+
       SecurityContextHolder.getContext().setAuthentication(authenticationToken);
     } catch (FirebaseAuthException ex) {
+      System.out.println(ex);
       response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
       response.getWriter().write("{\"error\": \"Invalid or expired Firebase token\"}");
       return;
