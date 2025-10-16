@@ -27,28 +27,21 @@ export class SseDemoComponent {
   start() {
     const url = 'http://localhost:8080/sse/subscribe';
     this.messages = [];
-    console.log('Connecting to SSE at', url);
     this.sub = this.sse.connect(url).subscribe({
       next: msg => {
         this.messages.push(msg);
-        console.log(msg);
-        console.log('Received SSE message:', msg);
       },
       error: err => {
         this.messages.push('Error: ' + err);
-        console.error('SSE error:', err);
       },
       complete: () => {
         this.messages.push('Stream closed');
-        console.log('SSE connection closed');
       },
     });
-    console.log('SSE connection initiated.');
   }
 
   stop() {
     this.sub?.unsubscribe();
-    console.log('SSE connection stopped.');
   }
 
   sendPing() {
@@ -62,14 +55,10 @@ export class SseDemoComponent {
     this.http.post(url, body, options).subscribe({
       next: () => {
         this.messages.push('Ping sent');
-        console.log('Ping POST successful');
       },
       error: error => {
         this.messages.push('Ping error: ' + error.message);
-        console.error('Ping POST error:', error.message);
       }
     });
   }
-
-
 }

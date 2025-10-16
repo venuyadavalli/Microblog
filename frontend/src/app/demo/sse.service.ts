@@ -1,19 +1,19 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable, Observer } from 'rxjs';
-import { fetchEventSource } from '@microsoft/fetch-event-source';
+import { fetchEventSource, EventSourceMessage } from '@microsoft/fetch-event-source';
 import { Auth } from '@angular/fire/auth';
-
-class RetriableError extends Error { }
-class FatalError extends Error { }
 
 @Injectable({ providedIn: 'root' })
 export class SseService {
   private auth = inject(Auth);
 
-  connect(url: string, options?: { maxRetries?: number, baseRetryMs?: number, maxRetryMs?: number }): Observable<string> {
+  connect(
+    url: string,
+    options?: { maxRetries?: number, baseRetryMs?: number, maxRetryMs?: number }
+  ): Observable<string> {
     return new Observable<string>(subscriber => {
-      this.openSseConnection(url, subscriber, options);
-      return () => subscriber.complete();
+      const cleanup = this.openSseConnection(url, subscriber, options);
+      return () => cleanup();
     });
   }
 
@@ -35,25 +35,25 @@ export class SseService {
     const cleanup = () => {
       aborted = true;
       controller.abort();
+      subscriber.complete();
     };
 
     const getRetryDelay = (attempt: number) =>
       Math.min(config.baseRetryMs * Math.pow(2, attempt), config.maxRetryMs);
 
-    const log = (msg: string, err?: any) =>
-      console.log(`[SseService] ${msg}`, err ?? '');
-
-    const handleMessage = (event: { data: { name: string, data: string } }) => {
+    const handleMessage = (event: EventSourceMessage) => {
       retryCount = 0;
-      subscriber.next(event.data.data);
+      try {
+        subscriber.next(event.data);
+      } catch (e) {
+        subscriber.next(event.data);
+      }
     };
 
     const handleError = (error: unknown) => {
       if (aborted) return;
-      log('Error in SSE connection:', error);
       if (retryCount < config.maxRetries) {
         const delay = getRetryDelay(retryCount++);
-        log(`Attempting reconnect #${retryCount} in ${delay} ms...`);
         setTimeout(() => { if (!aborted) openSse(); }, delay);
       } else {
         subscriber.error(error);
@@ -64,22 +64,22 @@ export class SseService {
     const handleOpen = async (response: Response) => {
       if (response.ok) return;
       if (response.status >= 400 && response.status < 500 && response.status !== 429)
-        throw new FatalError('Client error (not retryable)');
-      throw new RetriableError('Temporary server error');
+        throw new Error('Client error (not retryable)');
+      throw new Error('Temporary server error');
     };
 
     const openSse = async () => {
       try {
         const user = this.auth.currentUser;
-        if (!user) throw new FatalError('No authenticated user');
+        if (!user) throw new Error('No authenticated user');
         const token = await user.getIdToken();
-        fetchEventSource(url, {
+        await fetchEventSource(url, {
           headers: { 'Authorization': `Bearer ${token}` },
           signal: controller.signal,
           async onopen(response) { await handleOpen(response); },
           onmessage: handleMessage,
-          onerror: (err) => { if (!(err instanceof FatalError)) handleError(err); else throw err; },
-          onclose: () => handleError(new RetriableError('Connection closed')),
+          onerror: handleError,
+          onclose: () => handleError(new Error('Connection closed')),
         });
       } catch (err) {
         handleError(err);
