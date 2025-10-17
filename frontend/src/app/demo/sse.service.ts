@@ -13,7 +13,10 @@ export class SseService {
   ): Observable<string> {
     return new Observable<string>(subscriber => {
       const cleanup = this.openSseConnection(url, subscriber, options);
-      return () => cleanup();
+      return () => {
+        console.log('[SSE] Connection cancelled or unsubscribed!');
+        cleanup();
+      };
     });
   }
 
@@ -33,9 +36,12 @@ export class SseService {
     const controller = new AbortController();
 
     const cleanup = () => {
-      aborted = true;
-      controller.abort();
-      subscriber.complete();
+      if (!aborted) {
+        aborted = true;
+        console.log('[SSE] Cleanup initiated—connection is being closed.');
+        controller.abort();
+        subscriber.complete();
+      }
     };
 
     const getRetryDelay = (attempt: number) =>
@@ -44,6 +50,7 @@ export class SseService {
     const handleMessage = (event: EventSourceMessage) => {
       retryCount = 0;
       try {
+        console.log('[SSE] Message received:', event);
         subscriber.next(event.data);
       } catch (e) {
         subscriber.next(event.data);
@@ -52,17 +59,23 @@ export class SseService {
 
     const handleError = (error: unknown) => {
       if (aborted) return;
+      console.log('[SSE] Connection error:', error);
       if (retryCount < config.maxRetries) {
         const delay = getRetryDelay(retryCount++);
+        console.log(`[SSE] Attempting reconnect #${retryCount} in ${delay}ms`);
         setTimeout(() => { if (!aborted) openSse(); }, delay);
       } else {
+        console.log('[SSE] Max retries reached—connection will close.');
         subscriber.error(error);
         cleanup();
       }
     };
 
     const handleOpen = async (response: Response) => {
-      if (response.ok) return;
+      if (response.ok) {
+        console.log("[SSE] Connection established successfully.");
+        return;
+      }
       if (response.status >= 400 && response.status < 500 && response.status !== 429)
         throw new Error('Client error (not retryable)');
       throw new Error('Temporary server error');
@@ -73,14 +86,19 @@ export class SseService {
         const user = this.auth.currentUser;
         if (!user) throw new Error('No authenticated user');
         const token = await user.getIdToken();
+
         await fetchEventSource(url, {
           headers: { 'Authorization': `Bearer ${token}` },
           signal: controller.signal,
           async onopen(response) { await handleOpen(response); },
           onmessage: handleMessage,
           onerror: handleError,
-          onclose: () => handleError(new Error('Connection closed')),
+          onclose: () => {
+            console.log('[SSE] Connection closed by server or client.');
+            handleError(new Error('Connection closed'));
+          },
         });
+
       } catch (err) {
         handleError(err);
       }
