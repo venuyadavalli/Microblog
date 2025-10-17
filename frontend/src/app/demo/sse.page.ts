@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { SseService } from './sse.service';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
+import { TabVisibilityService } from './visibility.service';
 
 @Component({
   selector: 'app-sse-demo',
@@ -15,12 +16,14 @@ import { CommonModule } from '@angular/common';
     </ul>
   `,
   standalone: true,
-  providers: [SseService],
+  providers: [SseService, TabVisibilityService],
   imports: [CommonModule]
 })
 export class SseDemoComponent {
   messages: string[] = [];
   private sub?: any;
+
+  tabVisibilityService = inject(TabVisibilityService);
 
   constructor(private sse: SseService, private http: HttpClient) { }
 
