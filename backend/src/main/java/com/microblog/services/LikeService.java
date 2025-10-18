@@ -28,6 +28,9 @@ public class LikeService {
   private LikeRepository likeRepository;
 
   @Autowired
+  private UserMapperService userMapperService;
+
+  @Autowired
   private CurrentUserService currentUser;
 
   public Like likePost(UUID postId) {
@@ -68,24 +71,13 @@ public class LikeService {
     return likeRepository.countByPost(post);
   }
 
-  private UserItem toUserItem(User user) {
-    UserItem u = new UserItem();
-    u.setId(user.getId());
-    u.setUsername(user.getUsername());
-    return u;
-  }
-
   public List<UserItem> getUsersWhoLikedPost(UUID postId) {
     Post post = postRepository.findById(postId).orElseThrow();
 
     return likeRepository.findByPost(post)
         .stream()
         .map(Like::getUser)
-        .map(this::toUserItem)
+        .map(userMapperService::toUserItem)
         .toList();
   }
-
-  // implement here to get the like count for a post
-  // else implement it in repo implicitly if repo
-  // can do it
 }

@@ -7,6 +7,7 @@ import com.microblog.dto.UserInfo;
 import com.microblog.dto.UserItem;
 import com.microblog.dto.UserItemView;
 import com.microblog.dto.UserProfileView;
+import com.microblog.models.User;
 
 import java.time.Instant;
 import java.time.ZoneId;
@@ -70,6 +71,13 @@ public class UserMapperService {
     return userItems.stream()
         .map(userItem -> toUserItemView(userItem, currentUser.getId()))
         .collect(Collectors.toList());
+  }
+
+  public UserItem toUserItem(User user) {
+    UserItem u = new UserItem();
+    u.setId(user.getId());
+    u.setUsername(user.getUsername());
+    return u;
   }
 
 }
