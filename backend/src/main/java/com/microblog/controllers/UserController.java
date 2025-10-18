@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.google.firebase.auth.FirebaseAuthException;
+import com.microblog.dto.UserInfo;
 import com.microblog.dto.UserItemView;
 import com.microblog.dto.UserProfileView;
 import com.microblog.services.CurrentUserService;
@@ -30,7 +31,7 @@ public class UserController {
 
   @GetMapping("/info/{username}")
   public UserProfileView getUserProfileViewByUsername(@PathVariable String username) throws FirebaseAuthException {
-    var targetUser = userService.getUserInfoByUsername(username);
+    UserInfo targetUser = userService.getUserInfoByUsername(username);
     return userMapperService.toUserProfileView(targetUser, currentUser.getId());
   }
 
