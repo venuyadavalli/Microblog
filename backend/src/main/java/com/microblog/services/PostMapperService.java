@@ -12,13 +12,13 @@ public class PostMapperService {
     @Autowired
     private LikeService likeService;
 
-    public PostView toPostView(Post post, String id) {
+    public PostView toPostView(Post post, String uid) {
         PostView dto = new PostView();
         dto.setId(post.getId());
         dto.setAuthorUsername(post.getAuthor().getUsername());
         dto.setContent(post.getContent());
         dto.setCreatedAt(post.getCreatedAt());
-        dto.setLiked(likeService.isLiked(post.getId(), id));
+        dto.setLiked(likeService.isLiked(post.getId(), uid));
         dto.setLikedCount(likeService.getLikeCount(post.getId()));
         return dto;
     }
