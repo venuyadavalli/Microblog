@@ -7,6 +7,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.UserRecord;
 import com.microblog.dto.UserInfo;
+import com.microblog.models.User;
 import com.microblog.repositories.UserRepository;
 
 @Service
@@ -29,6 +30,12 @@ public class AuthService {
         .setEmail(email)
         .setPassword(password);
     UserRecord userRecord = firebaseAuth.createUser(request);
+
+    User user = new User();
+    user.setId(userRecord.getUid());
+    user.setUsername(username);
+    userRepository.save(user);
+
     String createdAt = String.valueOf(userRecord.getUserMetadata().getCreationTimestamp());
 
     UserInfo userInfo = new UserInfo();
