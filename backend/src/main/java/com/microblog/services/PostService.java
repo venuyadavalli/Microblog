@@ -13,13 +13,11 @@ import java.util.UUID;
 @Service
 public class PostService {
 
-    private final PingEventPublisher pingEventPublisher;
+    @Autowired
+    private PingEventPublisher pingEventPublisher;
+
     @Autowired
     private PostRepository postRepository;
-
-    PostService(PingEventPublisher pingEventPublisher) {
-        this.pingEventPublisher = pingEventPublisher;
-    }
 
     public List<Post> getPostsByUsername(String username) {
         return postRepository.findAllByAuthorUsername(username);
