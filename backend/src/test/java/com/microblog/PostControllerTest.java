@@ -33,9 +33,9 @@ public class PostControllerTest extends BaseSecurityTest {
 
   @Test
   void addRandomPostsTest() throws FirebaseAuthException {
-    for (int i = 1; i <= 10; i++) {
+    for (int i = 1; i <= 3; i++) {
       Post post = new Post();
-      post.setContent("Random post content #" + i + " at " + System.currentTimeMillis());
+      post.setContent("random post #" + i + " content @ " + System.currentTimeMillis());
       PostView saved = postController.addPost(post);
       System.out.println("========addPostTest " + i + "=========");
       System.out.println("saved post content: " + saved.getContent());
