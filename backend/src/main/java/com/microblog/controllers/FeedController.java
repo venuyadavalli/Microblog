@@ -24,10 +24,10 @@ public class FeedController {
     return feedService.getPublicFeed(page, size);
   }
 
-  // @GetMapping("/following")
-  // public Page<PostView> getFollowingFeed(
-  // @RequestParam(defaultValue = "0") int page,
-  // @RequestParam(defaultValue = "10") int size) {
-  // return feedService.getFollowingFeed(page, size);
-  // }
+  @GetMapping("/following")
+  public Page<PostView> getFollowingFeed(
+      @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "10") int size) {
+    return feedService.getFollowingFeed(page, size);
+  }
 }
