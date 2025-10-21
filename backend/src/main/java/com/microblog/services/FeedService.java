@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import com.microblog.dto.PostView;
 import com.microblog.models.Post;
 import com.microblog.repositories.PostRepository;
-import com.microblog.repositories.UserRepository;
 
 @Service
 public class FeedService {
@@ -30,9 +29,6 @@ public class FeedService {
   @Autowired
   private CurrentUserService currentUser;
 
-  @Autowired
-  private UserRepository userRepository;
-
   public Page<PostView> getPublicFeed(int page, int size) {
     Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
     Page<Post> posts = postRepository.findAll(pageable);
@@ -48,7 +44,6 @@ public class FeedService {
 
     Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
     Page<Post> posts = postRepository.findByAuthorUsernameIn(followingUsernames, pageable);
-    // return posts;
     return posts.map(post -> postMapperService.toPostView(post, currentUser.getId()));
   }
 }
