@@ -36,13 +36,11 @@ public class AuthService {
     user.setUsername(username);
     userRepository.save(user);
 
-    String createdAt = String.valueOf(userRecord.getUserMetadata().getCreationTimestamp());
-
     UserInfo userInfo = new UserInfo();
     userInfo.setId(userRecord.getUid());
     userInfo.setEmail(userRecord.getEmail());
     userInfo.setUsername(username);
-    userInfo.setCreationTime(createdAt);
+    userInfo.setCreationTimestamp(userRecord.getUserMetadata().getCreationTimestamp());
     return userInfo;
   }
 

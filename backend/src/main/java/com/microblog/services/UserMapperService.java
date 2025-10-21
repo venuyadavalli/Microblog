@@ -1,5 +1,9 @@
 package com.microblog.services;
 
+import java.time.Instant;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -8,13 +12,6 @@ import com.microblog.dto.UserItem;
 import com.microblog.dto.UserItemView;
 import com.microblog.dto.UserProfileView;
 import com.microblog.models.User;
-
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class UserMapperService {
@@ -25,20 +22,11 @@ public class UserMapperService {
   @Autowired
   private CurrentUserService currentUser;
 
-  public static String formatEpochMilliToDate(String epochMilliStr) {
-    long epochMilli = Long.parseLong(epochMilliStr);
-    Instant instant = Instant.ofEpochMilli(epochMilli);
-    ZonedDateTime dateTime = instant.atZone(ZoneId.of("Asia/Kolkata"));
-    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMMM dd, yyyy");
-    return dateTime.format(formatter);
-  }
-
   public UserProfileView toUserProfileView(UserInfo userInfo, String currentUserId) {
     UserProfileView view = new UserProfileView();
     view.setId(userInfo.getId());
     view.setUsername(userInfo.getUsername());
-    String createdAt = formatEpochMilliToDate(userInfo.getCreationTime());
-    view.setCreatedAt(createdAt);
+    view.setCreatedAt(Instant.ofEpochMilli(userInfo.getCreationTimestamp()).toString());
     view.setIsFollowed(followService.isFollowing(currentUserId, userInfo.getId()));
     return view;
   }

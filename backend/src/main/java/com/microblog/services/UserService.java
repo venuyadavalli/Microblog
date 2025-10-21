@@ -24,13 +24,12 @@ public class UserService {
   private UserInfo getUserInfoByUser(User user) {
     try {
       UserRecord userRecord = firebaseAuth.getUser(user.getId());
-      String createdAt = String.valueOf(userRecord.getUserMetadata().getCreationTimestamp());
 
       UserInfo userInfo = new UserInfo();
       userInfo.setId(user.getId());
       userInfo.setEmail(userRecord.getEmail());
       userInfo.setUsername(user.getUsername());
-      userInfo.setCreationTime(createdAt);
+      userInfo.setCreationTimestamp(userRecord.getUserMetadata().getCreationTimestamp());
 
       return userInfo;
     } catch (FirebaseAuthException e) {

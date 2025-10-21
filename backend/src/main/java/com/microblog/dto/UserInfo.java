@@ -4,7 +4,7 @@ public class UserInfo {
   private String id;
   private String email;
   private String username;
-  private String creationTime;
+  private long creationTimestamp;
 
   public String getId() {
     return id;
@@ -30,12 +30,12 @@ public class UserInfo {
     this.username = username;
   }
 
-  public String getCreationTime() {
-    return creationTime;
+  public long getCreationTimestamp() {
+    return creationTimestamp;
   }
 
-  public void setCreationTime(String creationTime) {
-    this.creationTime = creationTime;
+  public void setCreationTimestamp(long creationTimestamp) {
+    this.creationTimestamp = creationTimestamp;
   }
 
 }
