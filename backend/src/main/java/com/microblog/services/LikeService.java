@@ -37,11 +37,8 @@ public class LikeService {
     User user = userRepository.findById(currentUser.getId()).orElseThrow();
     Post post = postRepository.findById(postId).orElseThrow();
     if (likeRepository.findByUserAndPost(user, post).isEmpty()) {
-      Like like = new Like();
-      like.setUser(user);
-      like.setPost(post);
-      likeRepository.save(like);
-      return like;
+      Like like = new Like(user, post);
+      return likeRepository.save(like);
     }
     throw new RuntimeException("Already liked");
   }
@@ -60,10 +57,7 @@ public class LikeService {
 
   public List<Post> getLikedPostsByUsername(String username) {
     User user = userRepository.findByUsername(username).orElseThrow();
-    return user.getLikes()
-        .stream()
-        .map(Like::getPost)
-        .collect(Collectors.toList());
+    return user.getLikes().stream().map(Like::getPost).collect(Collectors.toList());
   }
 
   public long getLikeCount(UUID postId) {
@@ -73,11 +67,6 @@ public class LikeService {
 
   public List<UserItem> getUsersWhoLikedPost(UUID postId) {
     Post post = postRepository.findById(postId).orElseThrow();
-
-    return likeRepository.findByPost(post)
-        .stream()
-        .map(Like::getUser)
-        .map(userMapperService::toUserItem)
-        .toList();
+    return likeRepository.findByPost(post).stream().map(Like::getUser).map(userMapperService::toUserItem).toList();
   }
 }

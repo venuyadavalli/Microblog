@@ -25,6 +25,8 @@ import com.microblog.services.UserMapperService;
 
 import jakarta.transaction.Transactional;
 
+// check if this needs refactoring based on LikeService
+// also wondering for what purpose transactional is being used
 @RestController
 @RequestMapping("/likes")
 public class LikeController {
