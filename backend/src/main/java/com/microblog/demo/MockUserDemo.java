@@ -5,6 +5,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,6 +16,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
+import com.microblog.models.User;
+import com.microblog.repositories.UserRepository;
 
 @RestController
 @RequestMapping("/mocktest")
@@ -25,6 +28,9 @@ public class MockUserDemo {
 
   @Value("${firebase_customid_verify_endpoint}")
   private String FIREBASE_CUSTOMID_VERIFY_ENDPOINT;
+
+  @Autowired
+  private UserRepository userRepository;
 
   @GetMapping("/ping")
   public String ping() {
@@ -40,8 +46,9 @@ public class MockUserDemo {
 
   // GET /mocktest?id=testUser123 - returns Firebase ID token for given UID
   @GetMapping
-  public String getIdTokenForUser(@RequestParam("id") String uid) throws Exception {
-    String customToken = FirebaseAuth.getInstance().createCustomToken(uid);
+  public String getIdTokenForUser(@RequestParam("username") String username) throws Exception {
+    User user = userRepository.findByUsername(username).orElseThrow();
+    String customToken = FirebaseAuth.getInstance().createCustomToken(user.getId());
     String endpoint = FIREBASE_CUSTOMID_VERIFY_ENDPOINT + FIREBASE_API_KEY;
     String body = String.format("{\"token\":\"%s\",\"returnSecureToken\":true}", customToken);
 
