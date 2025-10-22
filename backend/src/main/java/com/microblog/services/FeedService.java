@@ -32,7 +32,7 @@ public class FeedService {
   public Page<PostView> getPublicFeed(int page, int size) {
     Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
     Page<Post> posts = postRepository.findAll(pageable);
-    return posts.map(post -> postMapperService.toPostView(post, currentUser.getId()));
+    return postMapperService.toPostViewPage(posts);
   }
 
   public Page<PostView> getFollowingFeed(int page, int size) {
@@ -44,6 +44,6 @@ public class FeedService {
 
     Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
     Page<Post> posts = postRepository.findByAuthorUsernameIn(followingUsernames, pageable);
-    return posts.map(post -> postMapperService.toPostView(post, currentUser.getId()));
+    return postMapperService.toPostViewPage(posts);
   }
 }

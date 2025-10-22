@@ -34,11 +34,11 @@ public class FollowsController {
 
   @GetMapping("/followers/{id}")
   public List<UserItemView> getFollowers(@PathVariable String id) {
-    return userMapperService.toUserItemViewListFromItems(followsService.getFollowers(id));
+    return userMapperService.toUserItemViewList(followsService.getFollowers(id));
   }
 
   @GetMapping("/followees/{id}")
   public List<UserItemView> getFollowees(@PathVariable String id) {
-    return userMapperService.toUserItemViewListFromItems(followsService.getFollowees(id));
+    return userMapperService.toUserItemViewList(followsService.getFollowees(id));
   }
 }

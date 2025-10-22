@@ -2,7 +2,6 @@ package com.microblog.controllers;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -14,28 +13,22 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.microblog.dto.PostView;
-import com.microblog.dto.UserItem;
 import com.microblog.dto.UserItemView;
 import com.microblog.models.Like;
 import com.microblog.models.Post;
-import com.microblog.services.CurrentUserService;
+import com.microblog.models.User;
 import com.microblog.services.LikeService;
 import com.microblog.services.PostMapperService;
 import com.microblog.services.UserMapperService;
 
 import jakarta.transaction.Transactional;
 
-// check if this needs refactoring based on LikeService
-// also wondering for what purpose transactional is being used
 @RestController
 @RequestMapping("/likes")
 public class LikeController {
 
   @Autowired
   private LikeService likeService;
-
-  @Autowired
-  private CurrentUserService currentUser;
 
   @Autowired
   private PostMapperService postMapperService;
@@ -58,18 +51,15 @@ public class LikeController {
 
   @GetMapping("/{postId}")
   public ResponseEntity<List<UserItemView>> getLikedUsersOfPost(@PathVariable UUID postId) {
-    List<UserItem> likedUsers = likeService.getUsersWhoLikedPost(postId);
-    List<UserItemView> likedUsersView = userMapperService.toUserItemViewListFromItems(likedUsers);
+    List<User> likedUsers = likeService.getUsersWhoLikedPost(postId);
+    List<UserItemView> likedUsersView = userMapperService.toUserItemViewList(likedUsers);
     return ResponseEntity.ok(likedUsersView);
   }
 
   @GetMapping("/user/{username}")
-  public ResponseEntity<List<PostView>> getLikedPostsByUser(@PathVariable String username) {
+  public List<PostView> getLikedPostsByUser(String username) {
     List<Post> likedPosts = likeService.getLikedPostsByUsername(username);
-    List<PostView> likedPostsView = likedPosts.stream()
-        .map(post -> postMapperService.toPostView(post, currentUser.getId()))
-        .collect(Collectors.toList());
-    return ResponseEntity.ok(likedPostsView);
+    return postMapperService.toPostViewList(likedPosts);
   }
 
 }

@@ -47,10 +47,8 @@ public class UserService {
     return getUserInfoByUser(user);
   }
 
-  public List<UserInfo> searchUsersByUsername(String usernamePart) {
+  public List<User> searchUsersByUsername(String usernamePart) {
     List<User> users = userRepository.findByUsernameContainingIgnoreCase(usernamePart);
-    return users.stream()
-        .map(user -> getUserInfoByUser(user))
-        .toList();
+    return users;
   }
 }

@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.microblog.dto.UserItem;
 import com.microblog.models.Like;
 import com.microblog.models.Post;
 import com.microblog.models.User;
@@ -26,9 +25,6 @@ public class LikeService {
 
   @Autowired
   private LikeRepository likeRepository;
-
-  @Autowired
-  private UserMapperService userMapperService;
 
   @Autowired
   private CurrentUserService currentUser;
@@ -65,8 +61,8 @@ public class LikeService {
     return likeRepository.countByPost(post);
   }
 
-  public List<UserItem> getUsersWhoLikedPost(UUID postId) {
+  public List<User> getUsersWhoLikedPost(UUID postId) {
     Post post = postRepository.findById(postId).orElseThrow();
-    return likeRepository.findByPost(post).stream().map(Like::getUser).map(userMapperService::toUserItem).toList();
+    return likeRepository.findByPost(post).stream().map(Like::getUser).toList();
   }
 }

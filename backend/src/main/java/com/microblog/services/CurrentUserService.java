@@ -3,7 +3,8 @@ package com.microblog.services;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.FirebaseToken;
 import com.microblog.dto.UserInfo;
-
+import com.microblog.models.User;
+import com.microblog.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -11,15 +12,11 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class CurrentUserService {
+  @Autowired
+  private UserRepository userRepository;
 
   @Autowired
   private UserService userService;
-
-  // private FirebaseToken getCurrentUserToken() {
-  // Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-  // FirebaseToken principal = (FirebaseToken) auth.getPrincipal();
-  // return principal;
-  // }
 
   private FirebaseToken getCurrentUserToken() {
     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -28,6 +25,11 @@ public class CurrentUserService {
       return (FirebaseToken) principal;
     }
     return null;
+  }
+
+  public User getUser() {
+    FirebaseToken token = getCurrentUserToken();
+    return userRepository.findById(token.getUid()).orElseThrow();
   }
 
   public UserInfo getInfo() throws FirebaseAuthException {
@@ -40,13 +42,4 @@ public class CurrentUserService {
     return (token != null) ? token.getUid() : null;
   }
 
-  public String getEmail() {
-    FirebaseToken token = getCurrentUserToken();
-    return (token != null) ? token.getEmail() : null;
-  }
-
-  public String getName() {
-    FirebaseToken token = getCurrentUserToken();
-    return (token != null) ? token.getName() : null;
-  }
 }

@@ -12,7 +12,7 @@ import com.google.firebase.auth.FirebaseAuthException;
 import com.microblog.dto.UserInfo;
 import com.microblog.dto.UserItemView;
 import com.microblog.dto.UserProfileView;
-import com.microblog.services.CurrentUserService;
+import com.microblog.models.User;
 import com.microblog.services.UserMapperService;
 import com.microblog.services.UserService;
 
@@ -26,19 +26,16 @@ public class UserController {
   @Autowired
   private UserMapperService userMapperService;
 
-  @Autowired
-  private CurrentUserService currentUser;
-
   @GetMapping("/info/{username}")
   public UserProfileView getUserProfileViewByUsername(@PathVariable String username) throws FirebaseAuthException {
     UserInfo targetUser = userService.getUserInfoByUsername(username);
-    return userMapperService.toUserProfileView(targetUser, currentUser.getId());
+    return userMapperService.toUserProfileView(targetUser);
   }
 
   @GetMapping("/search/{usernamePart}")
   public List<UserItemView> searchUsers(@PathVariable String usernamePart) throws FirebaseAuthException {
-    var matchingUsers = userService.searchUsersByUsername(usernamePart);
-    return userMapperService.toUserItemViewList(matchingUsers, currentUser.getId());
+    List<User> matchingUsers = userService.searchUsersByUsername(usernamePart);
+    return userMapperService.toUserItemViewList(matchingUsers);
   }
 
 }

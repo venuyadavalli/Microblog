@@ -78,4 +78,13 @@ public class Post {
   public void setCreatedAt(LocalDateTime createdAt) {
     this.createdAt = createdAt;
   }
+
+  public List<Like> getLikes() {
+    return likes;
+  }
+
+  public void setLikes(List<Like> likes) {
+    this.likes = likes;
+  }
+
 }

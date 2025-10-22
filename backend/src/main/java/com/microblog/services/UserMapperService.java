@@ -2,13 +2,12 @@ package com.microblog.services;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.microblog.dto.UserInfo;
-import com.microblog.dto.UserItem;
 import com.microblog.dto.UserItemView;
 import com.microblog.dto.UserProfileView;
 import com.microblog.models.User;
@@ -22,50 +21,34 @@ public class UserMapperService {
   @Autowired
   private CurrentUserService currentUser;
 
-  public UserProfileView toUserProfileView(UserInfo userInfo, String currentUserId) {
+  public UserProfileView toUserProfileView(UserInfo userInfo) {
     UserProfileView view = new UserProfileView();
     view.setId(userInfo.getId());
     view.setUsername(userInfo.getUsername());
     view.setCreatedAt(Instant.ofEpochMilli(userInfo.getCreationTimestamp()).toString());
-    view.setIsFollowed(followService.isFollowing(currentUserId, userInfo.getId()));
+    view.setIsFollowed(followService.isFollowing(currentUser.getId(), userInfo.getId()));
     return view;
   }
 
-  private UserItemView toUserItemView(UserInfo userInfo, String currentUserId) {
+  private UserItemView toUserItemView(User user, Boolean isFollowing) {
     UserItemView view = new UserItemView();
-    view.setId(userInfo.getId());
-    view.setUsername(userInfo.getUsername());
-    Boolean isFollowed = followService.isFollowing(currentUserId, userInfo.getId());
-    view.setIsFollowed(isFollowed);
+    view.setId(user.getId());
+    view.setUsername(user.getUsername());
+    view.setIsFollowed(isFollowing);
     return view;
   }
 
-  public List<UserItemView> toUserItemViewList(List<UserInfo> userInfos, String currentUserId) {
-    return userInfos.stream()
-        .map(userInfo -> toUserItemView(userInfo, currentUserId))
-        .collect(Collectors.toList());
-  }
-
-  private UserItemView toUserItemView(UserItem userItem, String currentUserId) {
-    UserItemView view = new UserItemView();
-    view.setId(userItem.getId());
-    view.setUsername(userItem.getUsername());
-    Boolean isFollowed = followService.isFollowing(currentUserId, userItem.getId());
-    view.setIsFollowed(isFollowed);
-    return view;
-  }
-
-  public List<UserItemView> toUserItemViewListFromItems(List<UserItem> userItems) {
-    return userItems.stream()
-        .map(userItem -> toUserItemView(userItem, currentUser.getId()))
-        .collect(Collectors.toList());
-  }
-
-  public UserItem toUserItem(User user) {
-    UserItem u = new UserItem();
-    u.setId(user.getId());
-    u.setUsername(user.getUsername());
-    return u;
+  public List<UserItemView> toUserItemViewList(List<User> users) {
+    List<String> targetUserIds = users.stream().map(User::getId).toList();
+    Set<String> followedUserIds = followService.getFollowedUserIds(currentUser.getId(), targetUserIds);
+    return users
+        .stream()
+        .map(user -> {
+          Boolean isFollowing = followedUserIds.contains(user.getId());
+          isFollowing = user.getId().equals(currentUser.getId()) ? null : isFollowing;
+          return toUserItemView(user, isFollowing);
+        })
+        .toList();
   }
 
 }
