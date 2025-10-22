@@ -34,7 +34,8 @@ public class CurrentUserService {
 
   public UserInfo getInfo() throws FirebaseAuthException {
     FirebaseToken token = getCurrentUserToken();
-    return userService.getUserInfoById(token.getUid());
+    User user = userRepository.findById(token.getUid()).orElseThrow();
+    return userService.getUserInfoByUsername(user.getUsername());
   }
 
   public String getId() {

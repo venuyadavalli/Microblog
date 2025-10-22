@@ -33,14 +33,12 @@ public class PostsController {
   public List<PostView> getAllPostsByUsername(@PathVariable String username)
       throws FirebaseAuthException {
     List<Post> posts = postService.getPostsByUsername(username);
-    List<PostView> views = postMapperService.toPostViewList(posts);
-    return views;
+    return postMapperService.toPostViewList(posts);
   }
 
   @PostMapping
   public PostView addPost(@RequestBody Post post) throws FirebaseAuthException {
-    PostView view = postMapperService.toPostView(postService.addPost(post), false, 0);
-    return view;
+    return postMapperService.toPostView(postService.addPost(post), false, 0);
   }
 
   @DeleteMapping("/{postId}")

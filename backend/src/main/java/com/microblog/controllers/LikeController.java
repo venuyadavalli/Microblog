@@ -57,7 +57,7 @@ public class LikeController {
   }
 
   @GetMapping("/user/{username}")
-  public List<PostView> getLikedPostsByUser(String username) {
+  public List<PostView> getLikedPostsByUser(@PathVariable String username) {
     List<Post> likedPosts = likeService.getLikedPostsByUsername(username);
     return postMapperService.toPostViewList(likedPosts);
   }

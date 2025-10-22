@@ -8,6 +8,7 @@ import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -19,7 +20,9 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+@Component
 public class AuthFilter extends OncePerRequestFilter {
+
   private static final String AUTH_HEADER = "Authorization";
   private static final String BEARER_PREFIX = "Bearer ";
 

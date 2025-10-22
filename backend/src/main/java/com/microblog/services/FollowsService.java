@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.microblog.models.Follows;
+import com.microblog.models.FollowsId;
 import com.microblog.models.User;
 import com.microblog.repositories.FollowsRepository;
 import com.microblog.repositories.UserRepository;
@@ -25,16 +26,17 @@ public class FollowsService {
   private CurrentUserService currentUser;
 
   public void followUser(String targetUserId) {
-    if (!followsRepository.existsByFollower_IdAndFollowee_Id(currentUser.getId(), targetUserId)) {
-      User follower = userRepository.findById(currentUser.getId()).orElseThrow();
-      User followee = userRepository.findById(targetUserId).orElseThrow();
-      Follows follows = new Follows(follower, followee);
-      followsRepository.save(follows);
+    if (followsRepository.existsByFollower_IdAndFollowee_Id(currentUser.getId(), targetUserId)) {
+      return;
     }
+    User follower = userRepository.findById(currentUser.getId()).orElseThrow();
+    User followee = userRepository.findById(targetUserId).orElseThrow();
+    Follows follows = new Follows(follower, followee);
+    followsRepository.save(follows);
   }
 
   public void unfollowUser(String targetUserId) {
-    followsRepository.deleteById(new com.microblog.models.FollowsId(currentUser.getId(), targetUserId));
+    followsRepository.deleteById(new FollowsId(currentUser.getId(), targetUserId));
   }
 
   public List<User> getFollowers(String targetUserId) {
@@ -53,15 +55,16 @@ public class FollowsService {
         .collect(Collectors.toList());
   }
 
-  public Boolean isFollowing(String currentUserId, String targetUserId) {
-    if (currentUserId.equals(targetUserId)) {
+  // from here on for userMapperService
+  public Boolean isFollowing(String sourceUserId, String targetUserId) {
+    if (sourceUserId.equals(targetUserId)) {
       return null;
     }
-    return followsRepository.existsByFollower_IdAndFollowee_Id(currentUserId, targetUserId);
+    return followsRepository.existsByFollower_IdAndFollowee_Id(sourceUserId, targetUserId);
   }
 
-  public Set<String> getFollowedUserIds(String currentUserId, List<String> targetUserIds) {
-    return followsRepository.findFollowedUserIds(currentUserId, targetUserIds);
+  public Set<String> getFollowedUserIds(String sourceUserId, List<String> targetUserIds) {
+    return followsRepository.findFollowedUserIds(sourceUserId, targetUserIds);
   }
 
 }

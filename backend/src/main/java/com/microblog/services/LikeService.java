@@ -32,11 +32,11 @@ public class LikeService {
   public Like likePost(UUID postId) {
     User user = userRepository.findById(currentUser.getId()).orElseThrow();
     Post post = postRepository.findById(postId).orElseThrow();
-    if (likeRepository.findByUserAndPost(user, post).isEmpty()) {
-      Like like = new Like(user, post);
-      return likeRepository.save(like);
+    if (!likeRepository.findByUserAndPost(user, post).isEmpty()) {
+      throw new RuntimeException("Already liked");
     }
-    throw new RuntimeException("Already liked");
+    Like like = new Like(user, post);
+    return likeRepository.save(like);
   }
 
   public void unlikePost(UUID postId) {
@@ -45,20 +45,9 @@ public class LikeService {
     likeRepository.deleteByUserAndPost(user, post);
   }
 
-  public boolean isLiked(UUID postId, String userId) {
-    User user = userRepository.findById(userId).orElseThrow();
-    Post post = postRepository.findById(postId).orElseThrow();
-    return likeRepository.findByUserAndPost(user, post).isPresent();
-  }
-
   public List<Post> getLikedPostsByUsername(String username) {
     User user = userRepository.findByUsername(username).orElseThrow();
     return user.getLikes().stream().map(Like::getPost).collect(Collectors.toList());
-  }
-
-  public long getLikeCount(UUID postId) {
-    Post post = postRepository.findById(postId).orElseThrow();
-    return likeRepository.countByPost(post);
   }
 
   public List<User> getUsersWhoLikedPost(UUID postId) {

@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 import com.microblog.dto.PostView;
 import com.microblog.models.Post;
 import com.microblog.repositories.LikeRepository;
-// is the code good / correct ?
+
 @Service
 public class PostMapperService {
 

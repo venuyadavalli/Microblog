@@ -21,20 +21,16 @@ public class UserService {
   @Autowired
   private UserRepository userRepository;
 
-  private UserInfo getUserInfoByUser(User user) {
-    try {
-      UserRecord userRecord = firebaseAuth.getUser(user.getId());
+  private UserInfo getUserInfoByUser(User user) throws FirebaseAuthException {
+    UserRecord userRecord = firebaseAuth.getUser(user.getId());
 
-      UserInfo userInfo = new UserInfo();
-      userInfo.setId(user.getId());
-      userInfo.setEmail(userRecord.getEmail());
-      userInfo.setUsername(user.getUsername());
-      userInfo.setCreationTimestamp(userRecord.getUserMetadata().getCreationTimestamp());
+    UserInfo userInfo = new UserInfo();
+    userInfo.setId(user.getId());
+    userInfo.setEmail(userRecord.getEmail());
+    userInfo.setUsername(user.getUsername());
+    userInfo.setCreationTimestamp(userRecord.getUserMetadata().getCreationTimestamp());
 
-      return userInfo;
-    } catch (FirebaseAuthException e) {
-      throw new RuntimeException("Failed to fetch Firebase info for user " + user.getId(), e);
-    }
+    return userInfo;
   }
 
   public UserInfo getUserInfoByUsername(String username) throws FirebaseAuthException {
@@ -42,13 +38,7 @@ public class UserService {
     return getUserInfoByUser(user);
   }
 
-  public UserInfo getUserInfoById(String userId) throws FirebaseAuthException {
-    User user = userRepository.findById(userId).orElseThrow();
-    return getUserInfoByUser(user);
-  }
-
   public List<User> searchUsersByUsername(String usernamePart) {
-    List<User> users = userRepository.findByUsernameContainingIgnoreCase(usernamePart);
-    return users;
+    return userRepository.findByUsernameContainingIgnoreCase(usernamePart);
   }
 }
