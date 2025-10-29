@@ -1,4 +1,5 @@
 # Microblog
+<<<<<<< HEAD
 
 ## Brief Description
 
@@ -80,3 +81,6 @@ Microblog is a Twitter-inspired web application built with **Spring Boot** (back
 
 * Notifications for likes, comments, and follows
 * Timestamps for posts and comments
+=======
+web Application using Angular and Springboot
+>>>>>>> 2995e7dd1d7abd17b684a9a52fee5dd9f336efa5
